@@ -94,7 +94,10 @@ def get_rag_answer(question):
     # print('Прочитал модель')
     # with open("model_creating/tokopuncia_v1.1.pkl", "rb") as openfile:
     #     tokenizer = pickle.load(openfile)
+
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+    # embedding_model = SentenceTransformer("deepvk/USER2-base")
+    # embedding_model = SentenceTransformer("sentence-transformers/sentence-t5-base")
     tokenizer = AutoTokenizer.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
     model = AutoModelForCausalLM.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
     print('Прочитал модель')
@@ -107,13 +110,20 @@ def get_rag_answer(question):
 
     context = ' '.join(list(set(best_sentences)))
 
-    input_text = f"вопрос: {question}\nконтекст: {context}\n"
+    # input_text = f"вопрос: {question}\nконтекст: {context}\n"
+    # input_text = f"Вопрос: {question}\nСводки из документов: {context}\nИспользуя указанные сводки, предоставь ответ на вопрос."
+
+    input_text = question
 
     inputs = tokenizer(input_text, return_tensors="pt", max_length=1024, truncation=True)
 
     print('Ввод токенизировали')
 
-    outputs = model.generate(inputs.input_ids, max_new_tokens=512, do_sample=True, temperature=0.7)
+    outputs = model.generate(inputs.input_ids,
+                             max_new_tokens=512,
+                             do_sample=True,
+                             temperature=0.7,
+                             repetition_penalty=1.3)
 
     print('Вывод получили')
 
