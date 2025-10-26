@@ -113,7 +113,7 @@ def get_rag_answer(question):
     # input_text = f"вопрос: {question}\nконтекст: {context}\n"
     # input_text = f"Вопрос: {question}\nСводки из документов: {context}\nИспользуя указанные сводки, предоставь ответ на вопрос."
 
-    input_text = question
+    input_text = f"Текст: {context}\n\nВопрос: {question}\nОтвет: "
 
     inputs = tokenizer(input_text, return_tensors="pt", max_length=1024, truncation=True)
 
