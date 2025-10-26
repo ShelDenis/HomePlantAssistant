@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RAG Модель</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <form method="POST" action="/model">
+        <h1>Что вас интересует?</h1>
+        <textarea rows="4" cols="50" name="question"></textarea><br>
+        <input type="submit" value="Получить ответ">
+
+        {% if answer %}
+        <div class="answer">
+            <strong>Ответ модели:</strong> {{ answer }}
+        </div>
+        {% endif %}
+    </form>
+</body>
+</html>
