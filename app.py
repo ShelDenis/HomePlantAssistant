@@ -9,6 +9,8 @@ import faiss
 from sentence_transformers import util
 import re
 
+from init_db import initialize_vector_db
+
 
 def retrieve_relevant_docs(query, model, tokenizer, embedding_model, k=5):
     print('в функцию docs зашел')
@@ -96,14 +98,27 @@ def get_rag_answer(question):
     #     tokenizer = pickle.load(openfile)
 
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-    # embedding_model = SentenceTransformer("deepvk/USER2-base")
-    # embedding_model = SentenceTransformer("sentence-transformers/sentence-t5-base")
     tokenizer = AutoTokenizer.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
     model = AutoModelForCausalLM.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
-    print('Прочитал модель')
-    relevant_docs = retrieve_relevant_docs(question, model, tokenizer, embedding_model)
-    print('Документы подобрал')
 
+    db = initialize_vector_db(embedding_model)
+    print(db)
+    # if db:
+    print("\n🔍 Тестовый поиск:")
+    test_query = "уход за растениями"
+    results = db.search(test_query, k=3)
+    print(results)
+    for i, result in enumerate(results, 1):
+        print(f"\n{i}. Релевантность: {(1 - result['distance']) * 100:.1f}%")
+        print(f"   Источник: {result['metadata'].get('source', 'неизвестен')}")
+        print(f"   Текст: {result['text'][:200]}...")
+
+    print('Прочитал модель')
+    # relevant_docs = retrieve_relevant_docs(question, model, tokenizer, embedding_model)
+    # relevant_docs = [res['text'] for res in results]
+    relevant_docs = results
+    print('Документы подобрал')
+    print(relevant_docs)
     best_sentences = select_best_paragraph(relevant_docs, question, embedding_model)
 
     print(best_sentences)

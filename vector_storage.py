@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 class VectorDB:
     """Векторная БД для хранения токенов и документов"""
     
-    def __init__(self, persist_dir: str = "./vector_db"):
+    def __init__(self, emb_model, persist_dir="./vector_db"):
         # Инициализация ChromaDB
         self.client = chromadb.PersistentClient(
             path=persist_dir,
@@ -25,16 +25,18 @@ class VectorDB:
         )
         
         # Модель для создания эмбеддингов (та же что в main)
-        self.embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-        
+        # self.embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+        self.embedding_model = emb_model
+
         print(f"✓ Векторная БД инициализирована. Документов в базе: {self.collection.count()}")
     
-    def load_documents_from_json(self, json_path: str = "data.json"):
+    def load_documents_from_json(self, json_path: str = "model_creating/data.json"):
         """Загрузка документов из существующего JSON файла"""
         
         with open(json_path, 'r', encoding='utf-8') as f:
+            print('считываю документы')
             documents = json.load(f)
-        
+            print('Документы считал')
         # Подготавливаем данные для ChromaDB
         ids = []
         texts = []
@@ -47,7 +49,8 @@ class VectorDB:
                 'title': doc.get('title', ''),
                 'source': doc['id']
             })
-        
+            print('Добавил документ')
+
         # Создаем эмбеддинги
         print("Создание эмбеддингов...")
         embeddings = self.embedding_model.encode(texts, show_progress_bar=True)
