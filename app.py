@@ -8,6 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import faiss
 from sentence_transformers import util
 import re
+import sys
 
 from init_db import initialize_vector_db
 
@@ -100,14 +101,13 @@ def get_rag_answer(question):
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     tokenizer = AutoTokenizer.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
     model = AutoModelForCausalLM.from_pretrained("ai-forever/rugpt3small_based_on_gpt2")
-
+    # Инициализируем БД
     db = initialize_vector_db(embedding_model)
-    print(db)
-    # if db:
+
     print("\n🔍 Тестовый поиск:")
-    test_query = "уход за растениями"
+    test_query = question
     results = db.search(test_query, k=3)
-    print(results)
+
     for i, result in enumerate(results, 1):
         print(f"\n{i}. Релевантность: {(1 - result['distance']) * 100:.1f}%")
         print(f"   Источник: {result['metadata'].get('source', 'неизвестен')}")
