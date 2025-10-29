@@ -10,7 +10,7 @@ import hashlib
 class VectorDB:
     """Векторная БД для хранения токенов и документов"""
     
-    def __init__(self, persist_dir: str = "./vector_db"):
+    def __init__(self, embedding_model, persist_dir: str = "./vector_db"):
         # Инициализация ChromaDB
         self.client = chromadb.PersistentClient(
             path=persist_dir,
@@ -18,7 +18,7 @@ class VectorDB:
         )
         
         print("Загрузка модели эмбеддингов...")
-        self.embedding_model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+        self.embedding_model = embedding_model
 
         # Получаем или создаем коллекцию с уникальным именем
         collection_name = f"plants_documents_multilingual"
@@ -37,7 +37,7 @@ class VectorDB:
         
         print(f"✓ Векторная БД инициализирована. Документов в базе: {self.collection.count()}")
     
-    def load_documents_from_json(self, json_path: str = "data.json"):
+    def load_documents_from_json(self, json_path: str = "model_creating/data.json"):
         """Загрузка документов из существующего JSON файла"""
         
         # Проверяем, не загружены ли уже документы

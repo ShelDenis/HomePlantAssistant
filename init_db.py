@@ -2,7 +2,7 @@ from vector_storage import VectorDB
 from pathlib import Path
 import sys
 
-def initialize_vector_db(force_reload=False):
+def initialize_vector_db(emb_model, force_reload=False):
     """
     Инициализация векторной БД из существующих файлов
     
@@ -11,7 +11,7 @@ def initialize_vector_db(force_reload=False):
     """
     
     # Создаем векторную БД
-    db = VectorDB(persist_dir="./vector_db")
+    db = VectorDB(emb_model, persist_dir="./vector_db")
     
     # Проверяем, есть ли уже документы
     stats = db.get_stats()
@@ -25,12 +25,12 @@ def initialize_vector_db(force_reload=False):
         print("⚠️ Очистка существующей БД для перезагрузки...")
         # Пересоздаем коллекцию
         db.collection.delete()
-        db = VectorDB(persist_dir="./vector_db")
+        db = VectorDB(emb_model, persist_dir="./vector_db")
     
     # Загружаем из data.json
-    if Path("data.json").exists():
+    if Path("model_creating/data.json").exists():
         print("📄 Загрузка документов из data.json...")
-        db.load_documents_from_json("data.json")
+        db.load_documents_from_json("model_creating/data.json")
     else:
         print("❌ Файл data.json не найден. Сначала запустите make_data.ipynb")
         return None
