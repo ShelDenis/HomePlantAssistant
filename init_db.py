@@ -1,6 +1,7 @@
 from vector_storage import VectorDB
 from pathlib import Path
 import sys
+from sentence_transformers import SentenceTransformer
 
 def initialize_vector_db(emb_model, force_reload=False):
     """
@@ -60,12 +61,13 @@ def test_search(db):
 
 if __name__ == "__main__":
     # Проверяем аргументы командной строки
+    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     force_reload = '--force' in sys.argv
     
     # Инициализируем БД
-    db = initialize_vector_db(force_reload=force_reload)
+    db = initialize_vector_db(embedding_model, force_reload=force_reload)
     
     if db:
         # Опционально: тестируем поиск
-        if '--test' in sys.argv:
-            test_search(db)
+        # if '--test' in sys.argv:
+        test_search(db)
