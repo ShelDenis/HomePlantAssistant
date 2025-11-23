@@ -10,7 +10,23 @@ from sentence_transformers import util
 import re
 import sys
 
+from langchain_core.documents import Document
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.output_parsers import StrOutputParser
+
+from langchain.prompts import ChatPromptTemplate
+from langchain.retrievers import BM25Retriever, WikipediaRetriever
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
+from langchain.retrievers.document_compressors import FlashrankRerank
+# from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from langchain_community.chat_models import GigaChat
+from sentence_transformers import CrossEncoder
+
 from init_db import initialize_vector_db
+
+
+API_TOKEN = 'MDE5YTIxNWUtNjlkOC03ZTM5LWE1ZTMtYjk0ZWQ1OGVjYTc5OjMyMjAyMjM5LTY0ZTUtNDVhYy04MGM4LWU2OTMyYzJkNTJhZQ=='
 
 
 def retrieve_relevant_docs(query, model, tokenizer, embedding_model, k=5):
@@ -146,6 +162,128 @@ def get_rag_answer(question):
     return answer.strip()[len(input_text) - 1:]
 
 
+def get_rag_answer_2(question):
+    print('В функцию вошел')
+    with open("model_creating/data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    docs = [Document(page_content=item["text"]) for item in data]
+
+    bm25_retriever = BM25Retriever.from_documents(docs)
+    bm25_retriever.k = 2
+
+
+    def hybrid_rrf_retriever(query):
+        bm25_docs = bm25_retriever.get_relevant_documents(query)
+        faiss_docs = faiss_retriever.get_relevant_documents(query)
+
+        fused_scores = {}
+        doc_map = {}
+
+        for rank, doc in enumerate(bm25_docs):
+            key = doc.page_content[:100]
+            fused_scores[key] = fused_scores.get(key, 0) + 1 / (rank + 60)
+            doc_map[key] = doc
+
+        for rank, doc in enumerate(faiss_docs):
+            key = doc.page_content[:100]
+            fused_scores[key] = fused_scores.get(key, 0) + 1 / (rank + 60)
+            if key not in doc_map:
+                doc_map[key] = doc
+
+        sorted_keys = sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
+
+        result = [doc_map[key] for key, score in sorted_keys]
+
+        return result
+
+    def rerank_docs(query, fused_docs):
+        if not fused_docs or len(fused_docs) == 0:
+            return ""
+
+        print('if not fused_docs or len(fused_docs) == 0:')
+
+        pairs = [[query, doc.page_content] for doc in fused_docs]
+        print('pairs')
+        scores = reranker_model.predict(pairs)
+        print('scores')
+        doc_with_scores = list(zip(fused_docs, scores))
+        print('doc_with_scores')
+        doc_with_scores.sort(key=lambda x: x[1], reverse=True)
+        print('doc_with_scores.sort')
+        reranked_docs = [doc for doc, score in doc_with_scores[:3]]
+        print('top-3')
+        cntxt = "\n\n".join([d.page_content for d in reranked_docs])
+        print(cntxt)
+        return cntxt
+
+    print('bm25_retriever')
+
+    embeddings = HuggingFaceBgeEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+
+    print('embeddings')
+
+    vectorstore = FAISS.from_documents(docs, embeddings)
+    faiss_retriever = vectorstore.as_retriever()
+
+    print('vectorstore')
+
+    print('fuser')
+
+    reranker_model = CrossEncoder(model_name="ai-forever/rugpt3small_based_on_gpt2")
+
+    print('reranker_model')
+
+    try:
+        llm = GigaChat(temperature=1,
+                       verify_ssl_certs=False,
+                       credentials=API_TOKEN)
+        print('GigaChat')
+    except Exception as e:
+        print(f"Ошибка инициализации GigaChat: {e}")
+        exit()
+
+    template = """
+    Ты полезный ИИ-ассистент. Отвечай на вопрос пользователя,
+    опираясь *только* на предоставленный ниже контекст.
+
+    Контекст:
+    {context}
+
+    Вопрос:
+    {question}
+    """
+    prompt = ChatPromptTemplate.from_template(template)
+    print('prompt')
+    full_rag_chain = (
+            {
+                "fused_docs": RunnableLambda(hybrid_rrf_retriever),
+                "question": RunnablePassthrough()
+            }
+            | RunnableLambda(
+        lambda x: {
+            "context": rerank_docs(x["question"], x["fused_docs"]),
+            "question": x["question"]
+        }
+    )
+            | prompt
+            | llm
+            | StrOutputParser()
+    )
+    print('full_rag_chain')
+    query = "На алое появились странные пятна. Что делать?"
+
+    try:
+        response = full_rag_chain.invoke(question)
+        print('response')
+        print(response)
+        return response
+    except Exception as e:
+        print(f'Error!: {e}')
+
+
 app = Flask(__name__)
 
 
@@ -166,7 +304,7 @@ def rag_answer():
         if not question.strip():
             return render_template('model_page.html', error="Вопрос не задан!")
         try:
-            answer = get_rag_answer(question)
+            answer = get_rag_answer_2(question)
             return render_template('model_page.html', answer=answer)
         except Exception as e:
             return render_template('model_page.html', error=f"Произошла ошибка: {str(e)}")
