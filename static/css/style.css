@@ -6,10 +6,11 @@
 
 body {
     background-color: #cfeacd;
+    margin: 0;
+    padding: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
     font-family: 'Georgia', serif;
 }
 
@@ -21,6 +22,13 @@ h1 {
 
 form {
     display: inline-block;
+    text-align: center;
+}
+
+section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
 }
 
@@ -57,12 +65,21 @@ input[type=submit]:hover {
 
 .answer {
     margin-top: 20px;
-    padding: 10px;
+    padding: 20px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    width: 45%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
+#answer-content {
+    text-align: left;
+    line-height: 1.6;
+}
+
 
 .answer strong {
     display: block;
@@ -70,28 +87,36 @@ input[type=submit]:hover {
 }
 
 a {
-    color: #007BFF; /* Синий цвет ссылки */
-    text-decoration: none; /* Убираем подчеркивание */
-    transition: color 0.3s ease; /* Плавный переход цвета */
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    margin-top: 20px;
 }
 
 a:hover {
-    color: #0056b3; /* Темно-синий цвет при наведении */
+    color: #0056b3;
 }
 
 a:visited {
-    color: #6c757d; /* Серый цвет для посещенных ссылок */
+    color: #6c757d;
 }
 
 a:active {
-    color: #004085; /* Темно-синий цвет при нажатии */
+    color: #004085;
+}
+
+article {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 button, input[type="submit"] {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #4caf50; /* Зеленый цвет кнопки */
+    background-color: #4caf50;
     color: white;
     border: none;
     border-radius: 5px;
@@ -104,4 +129,44 @@ button:hover, input[type="submit"]:hover {
 
 button:active, input[type="submit"]:active {
     background-color: #409147;
+}
+
+.top-plants {
+    width: 100%;
+    height: 300px;
+    background-image: url('../../static/images/up_plants.png');
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+    -webkit-mask-image: linear-gradient(90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+}
+
+.bottom-plants {
+    width: 100%;
+    height: 300px;
+    background-image: url('../../static/images/down_plants.png');
+    background-repeat: repeat-x;
+    background-size: auto 100%;
+    -webkit-mask-image: linear-gradient(90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(90deg,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
 }

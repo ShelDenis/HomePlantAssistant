@@ -8,7 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import faiss
 from sentence_transformers import util
 import re
-import sys
+from faiss_manager import FAISSManager
 
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -172,6 +172,35 @@ def get_rag_answer_2(question):
     bm25_retriever = BM25Retriever.from_documents(docs)
     bm25_retriever.k = 2
 
+    print('bm25_retriever')
+
+    embeddings = HuggingFaceBgeEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+
+    print('embeddings')
+
+    # vectorstore = FAISS.from_documents(docs, embeddings)
+    # faiss_retriever = vectorstore.as_retriever()
+    manager = FAISSManager(
+                index_dir="cache/faiss_index",
+                # embeddings_model="all-MiniLM-L6-v2"
+            )
+    vectorstore = manager.load_or_create(
+                docs=docs,
+                embeddings=embeddings,
+                data_path="model_creating/data.json"
+            )
+    # vectorstore = manager.load_or_create(docs, embeddings, data_path="data.json")
+    faiss_retriever = manager.get_retriever(k=5)
+
+    print('vectorstore')
+
+    print('fuser')
+
+    reranker_model = CrossEncoder(model_name="ai-forever/rugpt3small_based_on_gpt2")
+
+    print('reranker_model')
 
     def hybrid_rrf_retriever(query):
         bm25_docs = bm25_retriever.get_relevant_documents(query)
@@ -215,26 +244,8 @@ def get_rag_answer_2(question):
         print('top-3')
         cntxt = "\n\n".join([d.page_content for d in reranked_docs])
         print(cntxt)
+        print('cntxt закончился')
         return cntxt
-
-    print('bm25_retriever')
-
-    embeddings = HuggingFaceBgeEmbeddings(
-        model_name="all-MiniLM-L6-v2"
-    )
-
-    print('embeddings')
-
-    vectorstore = FAISS.from_documents(docs, embeddings)
-    faiss_retriever = vectorstore.as_retriever()
-
-    print('vectorstore')
-
-    print('fuser')
-
-    reranker_model = CrossEncoder(model_name="ai-forever/rugpt3small_based_on_gpt2")
-
-    print('reranker_model')
 
     try:
         llm = GigaChat(temperature=1,
@@ -246,7 +257,7 @@ def get_rag_answer_2(question):
         exit()
 
     template = """
-    Ты полезный ИИ-ассистент. Отвечай на вопрос пользователя,
+    Ответь на вопрос пользователя,
     опираясь *только* на предоставленный ниже контекст.
 
     Контекст:
@@ -257,6 +268,7 @@ def get_rag_answer_2(question):
     """
     prompt = ChatPromptTemplate.from_template(template)
     print('prompt')
+    print(prompt)
     full_rag_chain = (
             {
                 "fused_docs": RunnableLambda(hybrid_rrf_retriever),
@@ -273,7 +285,6 @@ def get_rag_answer_2(question):
             | StrOutputParser()
     )
     print('full_rag_chain')
-    query = "На алое появились странные пятна. Что делать?"
 
     try:
         response = full_rag_chain.invoke(question)
