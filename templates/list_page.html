@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комнатные растения</title>
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Факты о растениях</h1>
+        <a href="/main_page" class="back-button">Вернуться к списку</a>
+        <div class="cards-grid" id="cards-container"></div>
+    </div>
+
+    <script>
+        const plants = [
+            { name: "Монстера", slug: "monstera" },
+            { name: "Фикус", slug: "ficus" },
+            { name: "Драцена", slug: "dracaena" },
+            { name: "Замиокулькас", slug: "zamioculcas" },
+            { name: "Бегония", slug: "begonia" },
+            { name: "Фуксия", slug: "fuksia" },
+            { name: "Герань", slug: "geran" },
+            { name: "Гибискус", slug: "hibiskus" },
+            { name: "Каланхое", slug: "kalanchoe" },
+            { name: "Мимоза", slug: "mimosa" },
+            { name: "Орхидея", slug: "orchideya" },
+            { name: "Алое", slug: "aloe" },
+            { name: "Аэониум", slug: "aeonium" },
+            { name: "Крассула", slug: "crassula" },
+            { name: "Эхеверия", slug: "echeveria" },
+            { name: "Эхинопсис", slug: "echinopsys" },
+            { name: "Хавортия", slug: "hawortia" },
+            { name: "Гастерия", slug: "gasteria" },
+            { name: "Опунция", slug: "opuntia" }
+        ];
+
+        const container = document.getElementById('cards-container');
+        plants.forEach(plant => {
+            const card = document.createElement('a');
+            card.href = `/plant/${plant.slug}`;
+            card.className = 'card';
+            
+            card.innerHTML = `
+                <div class="card-image">
+                    <img src="../../static/images/plants/${plant.slug}.jpg" alt="${plant.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="card-content">
+                    <div>
+                        <div class="card-title">${plant.name}</div>
+                    </div>
+                    <button class="card-button">Узнать больше</button>
+                </div>
+            `;
+            
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>

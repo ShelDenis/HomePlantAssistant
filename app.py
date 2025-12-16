@@ -9,6 +9,7 @@ import faiss
 from sentence_transformers import util
 import re
 from faiss_manager import FAISSManager
+from random import choice
 
 from langchain_core.documents import Document
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -321,6 +322,51 @@ def rag_answer():
             return render_template('model_page.html', error=f"Произошла ошибка: {str(e)}")
     else:
         return render_template('model_page.html')
+
+
+@app.route('/plant_list')
+def plant_list_page():
+    return render_template('list_page.html')
+
+
+@app.route('/plant/<plant_slug>')
+def plant_detail_page(plant_slug):
+    advice_types = ['режим полива',
+                    'профилактику от вредителей',
+                    'общую информацию',
+                    'подходящую освещенность',
+                    'возможные заболевания']
+
+    plants_data = {
+        'monstera': 'Монстера',
+        'ficus': 'Фикус',
+        'dracaena': 'Драцена',
+        'zamioculcas': 'Замиокулькас',
+        'begonia': 'Бегония',
+        'fuksia': 'Фуксия',
+        'geran': 'Герань',
+        'hibiskus': 'Гибискус',
+        'kalanchoe': 'Каланхое',
+        'mimosa': 'Мимоза',
+        'orchideya': 'Орхидея',
+        'aloe': 'Алое',
+        'aeonium': 'Аэониум',
+        'crassula': 'Крассула',
+        'echeveria': 'Эхеверия',
+        'echinopsys': 'Эхинопсис',
+        'hawortia': 'Хавортия',
+        'gasteria': 'Гастерия',
+        'opuntia': 'Опунция',
+    }
+
+    plant = plants_data.get(plant_slug)
+    advice = choice(advice_types)
+
+    question = (f'Расскажи про {advice} для растения {plant}')
+
+    answer = get_rag_answer_2(question)
+
+    return render_template('plant_detail_page.html', plant=plant, slug=plant_slug, answer=answer)
 
 
 if __name__ == 'main':

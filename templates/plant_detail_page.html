@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ plant }}</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <a href="/plant_list" class="back-button">Вернуться к списку</a>
+    <div class="container">
+        <div class="detail-wrapper">
+            <div class="plant-image">
+                <img src="../../static/images/plants/{{ slug }}.jpg" alt="{{ plant }}">
+            </div>
+
+            <div class="plant-info">
+                <h1>{{ plant }}</h1>
+
+                <div class="info-section">
+                    <div class="info-label">Любопытный факт</div>
+                    <div class="info-value">{{ answer }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
