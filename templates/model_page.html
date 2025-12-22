@@ -7,22 +7,24 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div class="top-plants"></div>
 
-    <form method="POST" action="/model">
-        <h1>Что вас интересует?</h1>
-        <textarea rows="4" cols="50" name="question"></textarea><br>
-        <input type="submit" value="Получить ответ">
+        <div class="top-plants"></div>
+        <div class="main-content">
+            <form method="POST" action="/model">
+                <h1>Что вас интересует?</h1>
+                <textarea rows="4" cols="50" name="question"></textarea><br>
+                <input type="submit" value="Получить ответ">
 
-        {% if answer %}
-        <div class="answer">
-            <strong>Ответ модели:</strong>
-            <div id="answer-content"></div>
+                {% if answer %}
+                <div class="answer">
+                    <strong>Ответ модели:</strong>
+                    <div id="answer-content"></div>
+                </div>
+                {% endif %}
+            </form>
+            <a href="/main" class="back-button">Вернуться в меню</a>
         </div>
-        {% endif %}
-    </form>
-
-    <div class="bottom-plants"></div>
+        <div class="bottom-plants"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
