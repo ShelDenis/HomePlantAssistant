@@ -19,19 +19,15 @@
 
                 <div class="info-section">
                     <div class="info-label">Любопытный факт</div>
-                    <div class="info-value">{{ answer }}</div>
+<!--                    <div class="info-value">{{ answer }}</div>-->
+                    <div class="info-value" id="answer-content"></div>
                 </div>
+                <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const answerText = `{{ answer }}`;
-                        if (answerText && answerText.trim() !== '') {
-                            try {
-                                const htmlContent = marked.parse(answerText);
-                                document.getElementById('answer-content').innerHTML = htmlContent;
-                            } catch(e) {
-                                console.error('Ошибка при парсинге Markdown:', e);
-                                document.getElementById('answer-content').textContent = answerText;
-                            }
+                        if (answerText) {
+                            document.getElementById('answer-content').innerHTML = marked.parse(answerText);
                         }
                     });
                 </script>
